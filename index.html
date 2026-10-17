@@ -1,104 +1,419 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Private Chat</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #eef2f7;
-    }
-    header {
-      background: #1769ff;
-      color: white;
-      padding: 18px;
-      font-size: 21px;
-      font-weight: bold;
-    }
-    #status {
-      font-size: 13px;
-      font-weight: normal;
-      margin-top: 5px;
-    }
-    #messages {
-      height: calc(100dvh - 150px);
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .msg {
-      padding: 12px 15px;
-      border-radius: 17px;
-      max-width: 82%;
-      background: white;
-      overflow-wrap: anywhere;
-    }
-    .mine {
-      background: #1769ff;
-      color: white;
-      align-self: flex-end;
-    }
-    form {
-      display: flex;
-      gap: 8px;
-      padding: 12px;
-      background: white;
-    }
-    input {
-      min-width: 0;
-      flex: 1;
-      padding: 13px;
-      border: 1px solid #ccd3df;
-      border-radius: 24px;
-      font-size: 16px;
-    }
-    button {
-      border: 0;
-      border-radius: 24px;
-      padding: 12px 18px;
-      background: #1769ff;
-      color: white;
-      font-size: 15px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Chat</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#eef2f7;color:#172033}
+header{background:#1769ff;color:white;padding:16px;font-size:21px;font-weight:bold}
+#status{font-size:13px;font-weight:normal;margin-top:6px}
+main{max-width:650px;margin:auto;padding:16px}
+.card{background:white;border-radius:15px;padding:18px;margin:12px 0;box-shadow:0 2px 9px #0000000d}
+input{width:100%;padding:13px;margin:7px 0;border:1px solid #ccd3df;border-radius:10px;font-size:16px}
+button{border:0;border-radius:10px;padding:12px 16px;background:#1769ff;color:white;font-size:15px;cursor:pointer;margin:4px 2px}
+button:disabled{opacity:.5}
+.secondary{background:#5b6475}
+.danger{background:#c62828}
+.hidden{display:none!important}
+.roomlink{overflow-wrap:anywhere;font-size:13px;background:#f1f4f9;padding:10px;border-radius:8px}
+#messages{height:48vh;min-height:250px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:12px;background:#f5f7fb;border-radius:12px}
+.msg{padding:11px 13px;border-radius:15px;background:white;max-width:85%;overflow-wrap:anywhere;align-self:flex-start}
+.mine{background:#1769ff;color:white;align-self:flex-end}
+.small{font-size:13px;color:#667085}
+form.sendform{display:flex;gap:7px;margin-top:10px}
+form.sendform input{flex:1;min-width:0;margin:0}
+form.sendform button{margin:0}
+hr{border:0;border-top:1px solid #e5e7eb;margin:15px 0}
+</style>
 </head>
 <body>
-  <header>
-    Private Chat
-    <div id="status">চ্যাটে স্বাগতম</div>
-  </header>
+<header>
+  Private Chat
+  <div id="status">ব্যক্তিগত মেসেজ সিস্টেম</div>
+</header>
 
-  <main id="messages">
-    <div class="msg">স্বাগতম! এখানে আপনার চ্যাটের ডিজাইন তৈরি হবে।</div>
-  </main>
+<main>
+  <section id="home" class="card hidden">
+    <h3>Private Chat-এ স্বাগতম</h3>
+    <p>আপনি অ্যাডমিন হলে অ্যাডমিন প্যানেলে প্রবেশ করুন।</p>
+    <button id="goAdmin">Admin Panel</button>
+  </section>
 
-  <form id="chatForm">
-    <input id="messageInput" placeholder="মেসেজ লিখুন..." autocomplete="off">
-    <button type="submit">Send</button>
-  </form>
+  <section id="login" class="card hidden">
+    <h3>অ্যাডমিন লগইন</h3>
+    <p class="small">আপনার Firebase Authentication-এ তৈরি করা ইমেইল ও পাসওয়ার্ড ব্যবহার করুন।</p>
+    <input id="email" type="email" placeholder="আপনার ইমেইল" autocomplete="username">
+    <input id="password" type="password" placeholder="আপনার পাসওয়ার্ড" autocomplete="current-password">
+    <button id="loginBtn">Login</button>
+    <p id="loginError" class="small"></p>
+  </section>
 
-  <script>
-    const form = document.getElementById('chatForm');
-    const input = document.getElementById('messageInput');
-    const messages = document.getElementById('messages');
+  <section id="adminPanel" class="hidden">
+    <div class="card">
+      <h3>অ্যাডমিন প্যানেল</h3>
+      <p>নতুন ব্যক্তিগত চ্যাট লিংক তৈরি করুন।</p>
+      <button id="createRoom">নতুন চ্যাট লিংক তৈরি</button>
+      <button id="logout" class="secondary">Logout</button>
+      <p id="adminMessage" class="small"></p>
+    </div>
+    <div class="card">
+      <h3>আপনার চ্যাট লিংকসমূহ</h3>
+      <div id="roomList">লোড হচ্ছে...</div>
+    </div>
+  </section>
 
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
+  <section id="chatPanel" class="card hidden">
+    <h3>ব্যক্তিগত চ্যাট</h3>
+    <div id="messages"></div>
+    <form id="sendForm" class="sendform">
+      <input id="messageInput" maxlength="2000" placeholder="মেসেজ লিখুন..." autocomplete="off">
+      <button type="submit" id="sendBtn">Send</button>
+    </form>
+    <p id="chatError" class="small"></p>
+    <button id="backAdmin" class="secondary hidden">অ্যাডমিন প্যানেলে ফিরুন</button>
+  </section>
 
-      const bubble = document.createElement('div');
-      bubble.className = 'msg mine';
-      bubble.textContent = text;
-      messages.appendChild(bubble);
-      input.value = '';
-      messages.scrollTop = messages.scrollHeight;
+  <section id="unavailable" class="card hidden">
+    <h3>চ্যাট খোলা যাচ্ছে না</h3>
+    <p>লিংকটি ভুল হতে পারে, বন্ধ করা হয়েছে, অথবা Firebase Rules সেট করা হয়নি।</p>
+  </section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, signInAnonymously,
+  onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, getDoc, setDoc, updateDoc,
+  addDoc, onSnapshot, query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDkYVvqxpGUcmsAJvK6ofIyNgn6-XZTin4",
+  authDomain: "private-chat-798f6.firebaseapp.com",
+  projectId: "private-chat-798f6",
+  storageBucket: "private-chat-798f6.firebasestorage.app",
+  messagingSenderId: "598670362336",
+  appId: "1:598670362336:web:35e7595356620d48cc7285",
+  measurementId: "G-F0S5M7N18D"
+};
+
+const ADMIN_UID = "NBF2IXHvSiZSzIuvLBIhEdDpnNo2";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const roomId = params.get("room");
+const isAdminPage = params.get("admin") === "1";
+
+let currentUser = null;
+let unsubscribeMessages = null;
+let unsubscribeRooms = null;
+let openingGuestSignIn = false;
+let roomStarted = false;
+
+function show(id) {
+  ["home","login","adminPanel","chatPanel","unavailable"].forEach(x =>
+    $(x).classList.add("hidden")
+  );
+  if (id) $(id).classList.remove("hidden");
+}
+
+function setStatus(text) {
+  $("status").textContent = text;
+}
+
+function errorText(error) {
+  return error?.message || "একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।";
+}
+
+$("goAdmin").onclick = () => {
+  location.href = location.pathname + "?admin=1";
+};
+
+$("loginBtn").onclick = async () => {
+  $("loginError").textContent = "";
+  $("loginBtn").disabled = true;
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      $("email").value.trim(),
+      $("password").value
+    );
+  } catch (e) {
+    $("loginError").textContent = "লগইন হয়নি: " + errorText(e);
+  } finally {
+    $("loginBtn").disabled = false;
+  }
+};
+
+$("logout").onclick = async () => {
+  await signOut(auth);
+  location.href = location.pathname + "?admin=1";
+};
+
+$("createRoom").onclick = async () => {
+  if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+
+  $("createRoom").disabled = true;
+  $("adminMessage").textContent = "লিংক তৈরি হচ্ছে...";
+
+  try {
+    const newId = crypto.randomUUID().replaceAll("-", "");
+    await setDoc(doc(db, "chats", newId), {
+      active: true,
+      createdAt: serverTimestamp()
     });
-  </script>
+
+    const link = location.origin + location.pathname + "?room=" + newId;
+    $("adminMessage").innerHTML = "";
+
+    const wrap = document.createElement("div");
+    wrap.className = "card";
+
+    const title = document.createElement("p");
+    title.textContent = "নতুন চ্যাট লিংক তৈরি হয়েছে:";
+
+    const linkBox = document.createElement("div");
+    linkBox.className = "roomlink";
+    linkBox.textContent = link;
+
+    const copy = document.createElement("button");
+    copy.textContent = "লিংক কপি করুন";
+    copy.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(link);
+        copy.textContent = "কপি হয়েছে";
+      } catch {
+        window.prompt("লিংক কপি করুন:", link);
+      }
+    };
+
+    const open = document.createElement("button");
+    open.textContent = "চ্যাট খুলুন";
+    open.onclick = () => window.open(link, "_blank");
+
+    wrap.append(title, linkBox, copy, open);
+    $("adminMessage").appendChild(wrap);
+  } catch (e) {
+    $("adminMessage").textContent = "লিংক তৈরি হয়নি: " + errorText(e);
+  } finally {
+    $("createRoom").disabled = false;
+  }
+};
+
+function loadAdminRooms() {
+  if (unsubscribeRooms) unsubscribeRooms();
+
+  unsubscribeRooms = onSnapshot(
+    collection(db, "chats"),
+    snapshot => {
+      $("roomList").innerHTML = "";
+
+      if (snapshot.empty) {
+        $("roomList").textContent = "এখনো কোনো চ্যাট লিংক তৈরি হয়নি।";
+        return;
+      }
+
+      snapshot.forEach(roomDoc => {
+        const data = roomDoc.data();
+        const link = location.origin + location.pathname +
+          "?room=" + roomDoc.id;
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const heading = document.createElement("strong");
+        heading.textContent = data.active ? "সক্রিয় চ্যাট" : "বন্ধ চ্যাট";
+
+        const linkBox = document.createElement("div");
+        linkBox.className = "roomlink";
+        linkBox.textContent = link;
+
+        const copy = document.createElement("button");
+        copy.textContent = "লিংক কপি";
+        copy.onclick = async () => {
+          try {
+            await navigator.clipboard.writeText(link);
+            copy.textContent = "কপি হয়েছে";
+          } catch {
+            window.prompt("লিংক কপি করুন:", link);
+          }
+        };
+
+        const open = document.createElement("button");
+        open.textContent = "চ্যাট খুলুন";
+        open.onclick = () => window.open(link, "_blank");
+
+        card.append(heading, linkBox, copy, open);
+
+        if (data.active) {
+          const disable = document.createElement("button");
+          disable.textContent = "লিংক বন্ধ করুন";
+          disable.className = "danger";
+          disable.onclick = async () => {
+            if (!confirm("এই চ্যাট লিংক বন্ধ করবেন?")) return;
+            try {
+              await updateDoc(doc(db, "chats", roomDoc.id), {
+                active: false
+              });
+            } catch (e) {
+              alert("বন্ধ করা যায়নি: " + errorText(e));
+            }
+          };
+          card.appendChild(disable);
+        }
+
+        $("roomList").appendChild(card);
+      });
+    },
+    e => {
+      $("roomList").textContent =
+        "চ্যাট লিংক লোড হয়নি: " + errorText(e);
+    }
+  );
+}
+
+async function openChat(user) {
+  if (roomStarted) return;
+  roomStarted = true;
+
+  try {
+    const roomRef = doc(db, "chats", roomId);
+    const roomSnap = await getDoc(roomRef);
+
+    if (!roomSnap.exists() ||
+        (roomSnap.data().active !== true && user.uid !== ADMIN_UID)) {
+      show("unavailable");
+      setStatus("চ্যাটটি পাওয়া যাচ্ছে না");
+      return;
+    }
+
+    show("chatPanel");
+    setStatus(user.uid === ADMIN_UID ? "অ্যাডমিন চ্যাট" : "ব্যক্তিগত চ্যাট");
+
+    if (user.uid === ADMIN_UID) {
+      $("backAdmin").classList.remove("hidden");
+    }
+
+    $("backAdmin").onclick = () => {
+      location.href = location.pathname + "?admin=1";
+    };
+
+    const messagesQuery = query(
+      collection(db, "chats", roomId, "messages"),
+      orderBy("createdAt", "asc")
+    );
+
+    unsubscribeMessages = onSnapshot(messagesQuery, snapshot => {
+      $("messages").innerHTML = "";
+
+      snapshot.forEach(messageDoc => {
+        const data = messageDoc.data();
+        const bubble = document.createElement("div");
+        bubble.className = "msg" +
+          ((data.sender === "admin") === (user.uid === ADMIN_UID)
+            ? " mine" : "");
+
+        bubble.textContent =
+          (data.sender === "admin" ? "অ্যাডমিন: " : "গেস্ট: ") +
+          (data.text || "");
+
+        $("messages").appendChild(bubble);
+      });
+
+      $("messages").scrollTop = $("messages").scrollHeight;
+    }, e => {
+      $("chatError").textContent =
+        "মেসেজ লোড হয়নি: " + errorText(e);
+    });
+
+  } catch (e) {
+    show("unavailable");
+    setStatus("চ্যাট খোলা যায়নি");
+    $("unavailable").querySelector("p").textContent =
+      "সমস্যা: " + errorText(e) +
+      " — Firebase Rules ঠিক করা আছে কি না পরীক্ষা করুন।";
+  }
+}
+
+$("sendForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const text = $("messageInput").value.trim();
+  if (!text || !roomId || !currentUser) return;
+
+  $("sendBtn").disabled = true;
+  $("chatError").textContent = "";
+
+  try {
+    await addDoc(collection(db, "chats", roomId, "messages"), {
+      text,
+      sender: currentUser.uid === ADMIN_UID ? "admin" : "guest",
+      createdAt: serverTimestamp()
+    });
+
+    $("messageInput").value = "";
+  } catch (e) {
+    $("chatError").textContent =
+      "মেসেজ পাঠানো যায়নি: " + errorText(e);
+  } finally {
+    $("sendBtn").disabled = false;
+  }
+});
+
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+
+  if (isAdminPage) {
+    if (user && user.uid === ADMIN_UID) {
+      show("adminPanel");
+      setStatus("অ্যাডমিন হিসেবে লগইন করা হয়েছে");
+      loadAdminRooms();
+    } else {
+      if (unsubscribeRooms) {
+        unsubscribeRooms();
+        unsubscribeRooms = null;
+      }
+      show("login");
+      setStatus("অ্যাডমিন লগইন");
+    }
+    return;
+  }
+
+  if (roomId) {
+    if (user) {
+      await openChat(user);
+    } else if (!openingGuestSignIn) {
+      openingGuestSignIn = true;
+      try {
+        await signInAnonymously(auth);
+      } catch (e) {
+        show("unavailable");
+        $("unavailable").querySelector("p").textContent =
+          "গেস্ট হিসেবে প্রবেশ করা যায়নি: " + errorText(e);
+      } finally {
+        openingGuestSignIn = false;
+      }
+    }
+    return;
+  }
+
+  show("home");
+  setStatus("ব্যক্তিগত মেসেজ সিস্টেম");
+});
+
+window.addEventListener("beforeunload", () => {
+  if (unsubscribeMessages) unsubscribeMessages();
+  if (unsubscribeRooms) unsubscribeRooms();
+});
+</script>
 </body>
 </html>
