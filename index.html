@@ -2,104 +2,92 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Private Chat</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#eef2f7;color:#172033}
-header{background:#1769ff;color:white;padding:16px;font-size:21px;font-weight:bold}
-#status{font-size:13px;font-weight:normal;margin-top:6px}
-main{max-width:650px;margin:auto;padding:16px}
-.card{background:white;border-radius:15px;padding:18px;margin:12px 0;box-shadow:0 2px 9px #0000000d}
-input{width:100%;padding:13px;margin:7px 0;border:1px solid #ccd3df;border-radius:10px;font-size:16px}
-button{border:0;border-radius:10px;padding:12px 16px;background:#1769ff;color:white;font-size:15px;cursor:pointer;margin:4px 2px}
-button:disabled{opacity:.5}
-.secondary{background:#5b6475}
-.danger{background:#c62828}
-.hidden{display:none!important}
-.roomlink{overflow-wrap:anywhere;font-size:13px;background:#f1f4f9;padding:10px;border-radius:8px}
-#messages{height:48vh;min-height:250px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:12px;background:#f5f7fb;border-radius:12px}
-.msg{padding:11px 13px;border-radius:15px;background:white;max-width:85%;overflow-wrap:anywhere;align-self:flex-start}
-.mine{background:#1769ff;color:white;align-self:flex-end}
-.small{font-size:13px;color:#667085}
-form.sendform{display:flex;gap:7px;margin-top:10px}
-form.sendform input{flex:1;min-width:0;margin:0}
-form.sendform button{margin:0}
-hr{border:0;border-top:1px solid #e5e7eb;margin:15px 0}
+body{margin:0;background:#edf2f7;font-family:Arial,sans-serif}
+header{background:#075e54;color:white;padding:16px;font-size:21px;text-align:center}
+main{max-width:650px;margin:auto;padding:12px}
+button{background:#087e6b;color:white;border:0;border-radius:8px;padding:12px;cursor:pointer;font-size:16px}
+input{width:100%;padding:13px;border:1px solid #ccc;border-radius:8px;font-size:16px}
+#messages{height:55vh;overflow:auto;background:white;padding:12px;border-radius:10px;margin:12px 0}
+.msg{background:#dcf8c6;padding:10px;border-radius:10px;margin:8px 0;overflow-wrap:anywhere}
+.adminmsg{background:#dce9ff}
+.msg img{max-width:100%;border-radius:8px}
+.msg audio{width:100%;max-width:280px}
+.small{font-size:12px;color:#555}
+#chat{display:none}
+.row{display:flex;gap:8px;align-items:center}
+.row input{flex:1;min-width:0}
+#photo{display:none}
+a{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
-<header>
-  Private Chat
-  <div id="status">ব্যক্তিগত মেসেজ সিস্টেম</div>
-</header>
-
+<header>Private Chat</header>
 <main>
-  <section id="home" class="card hidden">
-    <h3>Private Chat-এ স্বাগতম</h3>
-    <p>আপনি অ্যাডমিন হলে অ্যাডমিন প্যানেলে প্রবেশ করুন।</p>
-    <button id="goAdmin">Admin Panel</button>
-  </section>
+<div id="login" style="display:none">
+<h3>Admin Login</h3>
+<input id="email" type="email" placeholder="Admin email">
+<br><br>
+<input id="password" type="password" placeholder="Password">
+<br><br>
+<button id="loginBtn">Login</button>
+<p id="error"></p>
+</div>
 
-  <section id="login" class="card hidden">
-    <h3>অ্যাডমিন লগইন</h3>
-    <p class="small">আপনার Firebase Authentication-এ তৈরি করা ইমেইল ও পাসওয়ার্ড ব্যবহার করুন।</p>
-    <input id="email" type="email" placeholder="আপনার ইমেইল" autocomplete="username">
-    <input id="password" type="password" placeholder="আপনার পাসওয়ার্ড" autocomplete="current-password">
-    <button id="loginBtn">Login</button>
-    <p id="loginError" class="small"></p>
-  </section>
+<div id="dashboard" style="display:none">
+<h3>নতুন চ্যাট লিংক তৈরি করুন</h3>
+<button id="createBtn">নতুন লিংক তৈরি</button>
+<p id="link"></p>
+<hr>
+<h3>চ্যাট খুলুন</h3>
+<input id="roomInput" placeholder="Room ID">
+<br><br>
+<button id="openRoom">চ্যাট খুলুন</button>
+</div>
 
-  <section id="adminPanel" class="hidden">
-    <div class="card">
-      <h3>অ্যাডমিন প্যানেল</h3>
-      <p>নতুন ব্যক্তিগত চ্যাট লিংক তৈরি করুন।</p>
-      <button id="createRoom">নতুন চ্যাট লিংক তৈরি</button>
-      <button id="logout" class="secondary">Logout</button>
-      <p id="adminMessage" class="small"></p>
-    </div>
-    <div class="card">
-      <h3>আপনার চ্যাট লিংকসমূহ</h3>
-      <div id="roomList">লোড হচ্ছে...</div>
-    </div>
-  </section>
-
-  <section id="chatPanel" class="card hidden">
-    <h3>ব্যক্তিগত চ্যাট</h3>
-    <div id="messages"></div>
-    <form id="sendForm" class="sendform">
-      <input id="messageInput" maxlength="2000" placeholder="মেসেজ লিখুন..." autocomplete="off">
-      <button type="submit" id="sendBtn">Send</button>
-    </form>
-    <p id="chatError" class="small"></p>
-    <button id="backAdmin" class="secondary hidden">অ্যাডমিন প্যানেলে ফিরুন</button>
-  </section>
-
-  <section id="unavailable" class="card hidden">
-    <h3>চ্যাট খোলা যাচ্ছে না</h3>
-    <p>লিংকটি ভুল হতে পারে, বন্ধ করা হয়েছে, অথবা Firebase Rules সেট করা হয়নি।</p>
-  </section>
+<div id="chat">
+<p id="roomLabel"></p>
+<div id="messages"></div>
+<form id="sendForm" class="row">
+<input id="messageInput" placeholder="মেসেজ লিখুন..." maxlength="2000" autocomplete="off">
+<button type="submit" id="sendBtn">Send</button>
+</form>
+<br>
+<div class="row">
+<button id="imageBtn" type="button">ছবি পাঠান</button>
+<button id="voiceBtn" type="button">ভয়েস রেকর্ড</button>
+</div>
+<input id="photo" type="file" accept="image/*">
+<p id="status"></p>
+<button id="backBtn" style="display:none">Admin প্যানেলে ফিরুন</button>
+</div>
 </main>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
 import {
-  getAuth, signInWithEmailAndPassword, signInAnonymously,
-  onAuthStateChanged, signOut
+ getAuth, signInAnonymously, signInWithEmailAndPassword,
+ onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 import {
-  getFirestore, collection, doc, getDoc, setDoc, updateDoc,
-  addDoc, onSnapshot, query, orderBy, serverTimestamp
+ getFirestore, collection, addDoc, doc, setDoc, getDoc,
+ onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDkYVvqxpGUcmsAJvK6ofIyNgn6-XZTin4",
-  authDomain: "private-chat-798f6.firebaseapp.com",
-  projectId: "private-chat-798f6",
-  storageBucket: "private-chat-798f6.firebasestorage.app",
-  messagingSenderId: "598670362336",
-  appId: "1:598670362336:web:35e7595356620d48cc7285",
-  measurementId: "G-F0S5M7N18D"
+ apiKey: "AIzaSyDkYVvqxpGUcmsAJvK6ofIyNgn6-XZTin4",
+ authDomain: "private-chat-798f6.firebaseapp.com",
+ projectId: "private-chat-798f6",
+ storageBucket: "private-chat-798f6.firebasestorage.app",
+ messagingSenderId: "598670362336",
+ appId: "1:598670362336:web:35e7595356620d48cc7285",
+ measurementId: "G-F0S5M7N18D"
 };
 
 const ADMIN_UID = "NBF2IXHvSiZSzIuvLBIhEdDpnNo2";
@@ -108,312 +96,320 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
-const roomId = params.get("room");
-const isAdminPage = params.get("admin") === "1";
+const adminMode = params.get("admin") === "1";
+let roomId = params.get("room");
+let isAdmin = false;
+let stopMessages = null;
+let recorder = null;
+let audioChunks = [];
 
-let currentUser = null;
-let unsubscribeMessages = null;
-let unsubscribeRooms = null;
-let openingGuestSignIn = false;
-let roomStarted = false;
+const $ = id => document.getElementById(id);
 
-function show(id) {
-  ["home","login","adminPanel","chatPanel","unavailable"].forEach(x =>
-    $(x).classList.add("hidden")
-  );
-  if (id) $(id).classList.remove("hidden");
+function show(id, yes=true) {
+ $(id).style.display = yes ? "block" : "none";
 }
 
-function setStatus(text) {
-  $("status").textContent = text;
+function safeText(value) {
+ return String(value ?? "");
 }
 
-function errorText(error) {
-  return error?.message || "একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।";
+function roomUrl(id, admin=false) {
+ return location.origin + location.pathname +
+  (admin ? "?admin=1&room=" : "?room=") + encodeURIComponent(id);
 }
-
-$("goAdmin").onclick = () => {
-  location.href = location.pathname + "?admin=1";
-};
 
 $("loginBtn").onclick = async () => {
-  $("loginError").textContent = "";
-  $("loginBtn").disabled = true;
-  try {
-    await signInWithEmailAndPassword(
-      auth,
-      $("email").value.trim(),
-      $("password").value
-    );
-  } catch (e) {
-    $("loginError").textContent = "লগইন হয়নি: " + errorText(e);
-  } finally {
-    $("loginBtn").disabled = false;
-  }
-};
-
-$("logout").onclick = async () => {
-  await signOut(auth);
-  location.href = location.pathname + "?admin=1";
-};
-
-$("createRoom").onclick = async () => {
-  if (!currentUser || currentUser.uid !== ADMIN_UID) return;
-
-  $("createRoom").disabled = true;
-  $("adminMessage").textContent = "লিংক তৈরি হচ্ছে...";
-
-  try {
-    const newId = crypto.randomUUID().replaceAll("-", "");
-    await setDoc(doc(db, "chats", newId), {
-      active: true,
-      createdAt: serverTimestamp()
-    });
-
-    const link = location.origin + location.pathname + "?room=" + newId;
-    $("adminMessage").innerHTML = "";
-
-    const wrap = document.createElement("div");
-    wrap.className = "card";
-
-    const title = document.createElement("p");
-    title.textContent = "নতুন চ্যাট লিংক তৈরি হয়েছে:";
-
-    const linkBox = document.createElement("div");
-    linkBox.className = "roomlink";
-    linkBox.textContent = link;
-
-    const copy = document.createElement("button");
-    copy.textContent = "লিংক কপি করুন";
-    copy.onclick = async () => {
-      try {
-        await navigator.clipboard.writeText(link);
-        copy.textContent = "কপি হয়েছে";
-      } catch {
-        window.prompt("লিংক কপি করুন:", link);
-      }
-    };
-
-    const open = document.createElement("button");
-    open.textContent = "চ্যাট খুলুন";
-    open.onclick = () => window.open(link, "_blank");
-
-    wrap.append(title, linkBox, copy, open);
-    $("adminMessage").appendChild(wrap);
-  } catch (e) {
-    $("adminMessage").textContent = "লিংক তৈরি হয়নি: " + errorText(e);
-  } finally {
-    $("createRoom").disabled = false;
-  }
-};
-
-function loadAdminRooms() {
-  if (unsubscribeRooms) unsubscribeRooms();
-
-  unsubscribeRooms = onSnapshot(
-    collection(db, "chats"),
-    snapshot => {
-      $("roomList").innerHTML = "";
-
-      if (snapshot.empty) {
-        $("roomList").textContent = "এখনো কোনো চ্যাট লিংক তৈরি হয়নি।";
-        return;
-      }
-
-      snapshot.forEach(roomDoc => {
-        const data = roomDoc.data();
-        const link = location.origin + location.pathname +
-          "?room=" + roomDoc.id;
-
-        const card = document.createElement("div");
-        card.className = "card";
-
-        const heading = document.createElement("strong");
-        heading.textContent = data.active ? "সক্রিয় চ্যাট" : "বন্ধ চ্যাট";
-
-        const linkBox = document.createElement("div");
-        linkBox.className = "roomlink";
-        linkBox.textContent = link;
-
-        const copy = document.createElement("button");
-        copy.textContent = "লিংক কপি";
-        copy.onclick = async () => {
-          try {
-            await navigator.clipboard.writeText(link);
-            copy.textContent = "কপি হয়েছে";
-          } catch {
-            window.prompt("লিংক কপি করুন:", link);
-          }
-        };
-
-        const open = document.createElement("button");
-        open.textContent = "চ্যাট খুলুন";
-        open.onclick = () => window.open(link, "_blank");
-
-        card.append(heading, linkBox, copy, open);
-
-        if (data.active) {
-          const disable = document.createElement("button");
-          disable.textContent = "লিংক বন্ধ করুন";
-          disable.className = "danger";
-          disable.onclick = async () => {
-            if (!confirm("এই চ্যাট লিংক বন্ধ করবেন?")) return;
-            try {
-              await updateDoc(doc(db, "chats", roomDoc.id), {
-                active: false
-              });
-            } catch (e) {
-              alert("বন্ধ করা যায়নি: " + errorText(e));
-            }
-          };
-          card.appendChild(disable);
-        }
-
-        $("roomList").appendChild(card);
-      });
-    },
-    e => {
-      $("roomList").textContent =
-        "চ্যাট লিংক লোড হয়নি: " + errorText(e);
-    }
+ $("error").textContent = "";
+ try {
+  await signInWithEmailAndPassword(
+   auth, $("email").value.trim(), $("password").value
   );
-}
+ } catch(e) {
+  $("error").textContent = "Login হয়নি: " + e.message;
+ }
+};
 
-async function openChat(user) {
-  if (roomStarted) return;
-  roomStarted = true;
+$("createBtn").onclick = async () => {
+ if (!isAdmin) return;
+ try {
+  const id = crypto.randomUUID().replaceAll("-", "").slice(0,20);
+  await setDoc(doc(db,"chats",id), {
+   active:true,
+   createdAt:serverTimestamp()
+  });
+  $("link").innerHTML = "";
+  const p = document.createElement("p");
+  p.textContent = "Guest লিংক: ";
+  const a = document.createElement("a");
+  a.href = roomUrl(id);
+  a.textContent = roomUrl(id);
+  a.target = "_blank";
+  p.appendChild(a);
+  $("link").appendChild(p);
 
-  try {
-    const roomRef = doc(db, "chats", roomId);
-    const roomSnap = await getDoc(roomRef);
+  const copy = document.createElement("button");
+  copy.textContent = "লিংক কপি";
+  copy.onclick = async () => {
+   await navigator.clipboard.writeText(roomUrl(id));
+   copy.textContent = "কপি হয়েছে";
+  };
+  $("link").appendChild(copy);
 
-    if (!roomSnap.exists() ||
-        (roomSnap.data().active !== true && user.uid !== ADMIN_UID)) {
-      show("unavailable");
-      setStatus("চ্যাটটি পাওয়া যাচ্ছে না");
-      return;
-    }
+  $("roomInput").value = id;
+ } catch(e) {
+  alert("লিংক তৈরি হয়নি: " + e.message);
+ }
+};
 
-    show("chatPanel");
-    setStatus(user.uid === ADMIN_UID ? "অ্যাডমিন চ্যাট" : "ব্যক্তিগত চ্যাট");
+$("openRoom").onclick = () => {
+ const id = $("roomInput").value.trim();
+ if (id) location.href = roomUrl(id, true);
+};
 
-    if (user.uid === ADMIN_UID) {
-      $("backAdmin").classList.remove("hidden");
-    }
-
-    $("backAdmin").onclick = () => {
-      location.href = location.pathname + "?admin=1";
-    };
-
-    const messagesQuery = query(
-      collection(db, "chats", roomId, "messages"),
-      orderBy("createdAt", "asc")
-    );
-
-    unsubscribeMessages = onSnapshot(messagesQuery, snapshot => {
-      $("messages").innerHTML = "";
-
-      snapshot.forEach(messageDoc => {
-        const data = messageDoc.data();
-        const bubble = document.createElement("div");
-        bubble.className = "msg" +
-          ((data.sender === "admin") === (user.uid === ADMIN_UID)
-            ? " mine" : "");
-
-        bubble.textContent =
-          (data.sender === "admin" ? "অ্যাডমিন: " : "গেস্ট: ") +
-          (data.text || "");
-
-        $("messages").appendChild(bubble);
-      });
-
-      $("messages").scrollTop = $("messages").scrollHeight;
-    }, e => {
-      $("chatError").textContent =
-        "মেসেজ লোড হয়নি: " + errorText(e);
-    });
-
-  } catch (e) {
-    show("unavailable");
-    setStatus("চ্যাট খোলা যায়নি");
-    $("unavailable").querySelector("p").textContent =
-      "সমস্যা: " + errorText(e) +
-      " — Firebase Rules ঠিক করা আছে কি না পরীক্ষা করুন।";
-  }
-}
-
-$("sendForm").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const text = $("messageInput").value.trim();
-  if (!text || !roomId || !currentUser) return;
-
-  $("sendBtn").disabled = true;
-  $("chatError").textContent = "";
-
-  try {
-    await addDoc(collection(db, "chats", roomId, "messages"), {
-      text,
-      sender: currentUser.uid === ADMIN_UID ? "admin" : "guest",
-      createdAt: serverTimestamp()
-    });
-
-    $("messageInput").value = "";
-  } catch (e) {
-    $("chatError").textContent =
-      "মেসেজ পাঠানো যায়নি: " + errorText(e);
-  } finally {
-    $("sendBtn").disabled = false;
-  }
-});
+$("backBtn").onclick = () => location.href = "?admin=1";
 
 onAuthStateChanged(auth, async user => {
-  currentUser = user;
-
-  if (isAdminPage) {
-    if (user && user.uid === ADMIN_UID) {
-      show("adminPanel");
-      setStatus("অ্যাডমিন হিসেবে লগইন করা হয়েছে");
-      loadAdminRooms();
-    } else {
-      if (unsubscribeRooms) {
-        unsubscribeRooms();
-        unsubscribeRooms = null;
-      }
-      show("login");
-      setStatus("অ্যাডমিন লগইন");
-    }
-    return;
+ if (!user) {
+  if (adminMode) show("login");
+  else {
+   try { await signInAnonymously(auth); }
+   catch(e) { $("status").textContent = e.message; }
   }
+  return;
+ }
 
-  if (roomId) {
-    if (user) {
-      await openChat(user);
-    } else if (!openingGuestSignIn) {
-      openingGuestSignIn = true;
-      try {
-        await signInAnonymously(auth);
-      } catch (e) {
-        show("unavailable");
-        $("unavailable").querySelector("p").textContent =
-          "গেস্ট হিসেবে প্রবেশ করা যায়নি: " + errorText(e);
-      } finally {
-        openingGuestSignIn = false;
-      }
-    }
-    return;
+ isAdmin = user.uid === ADMIN_UID;
+
+ if (adminMode && !isAdmin) {
+  show("login");
+  $("error").textContent = "এই অ্যাকাউন্ট Admin নয়।";
+  return;
+ }
+
+ if (adminMode && !roomId) {
+  show("login",false);
+  show("dashboard");
+  show("chat",false);
+  return;
+ }
+
+ if (!adminMode && !roomId) {
+  show("login",false);
+  show("dashboard",false);
+  $("status").textContent = "চ্যাট লিংক সঠিক নয়।";
+  return;
+ }
+
+ show("login",false);
+ show("dashboard",false);
+ show("chat");
+
+ $("roomLabel").textContent = "Room ID: " + roomId;
+ show("backBtn",isAdmin);
+
+ try {
+  const roomSnap = await getDoc(doc(db,"chats",roomId));
+  if (!roomSnap.exists() || roomSnap.data().active !== true) {
+   $("status").textContent = "এই চ্যাট লিংক বন্ধ অথবা ভুল।";
+   $("sendBtn").disabled = true;
+   return;
   }
-
-  show("home");
-  setStatus("ব্যক্তিগত মেসেজ সিস্টেম");
+  startMessages();
+ } catch(e) {
+  $("status").textContent = "চ্যাট খুলতে সমস্যা: " + e.message;
+ }
 });
 
-window.addEventListener("beforeunload", () => {
-  if (unsubscribeMessages) unsubscribeMessages();
-  if (unsubscribeRooms) unsubscribeRooms();
-});
+function startMessages() {
+ if (stopMessages) stopMessages();
+
+ const q = query(
+  collection(db,"chats",roomId,"messages"),
+  orderBy("createdAt","asc")
+ );
+
+ stopMessages = onSnapshot(q, snapshot => {
+  $("messages").innerHTML = "";
+
+  snapshot.forEach(item => {
+   const m = item.data();
+   const box = document.createElement("div");
+   box.className = "msg " +
+    (m.sender === "admin" ? "adminmsg" : "");
+
+   const who = document.createElement("div");
+   who.className = "small";
+   who.textContent = m.sender === "admin" ? "Admin" : "Guest";
+   box.appendChild(who);
+
+   if (m.type === "image" && m.mediaData) {
+    const img = document.createElement("img");
+    img.src = m.mediaData;
+    img.alt = "ছবি";
+    box.appendChild(img);
+   } else if (m.type === "audio" && m.mediaData) {
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.src = m.mediaData;
+    box.appendChild(audio);
+   } else {
+    const text = document.createElement("div");
+    text.textContent = safeText(m.text);
+    box.appendChild(text);
+   }
+
+   $("messages").appendChild(box);
+  });
+
+  $("messages").scrollTop = $("messages").scrollHeight;
+ }, e => {
+  $("status").textContent = "মেসেজ লোড হয়নি: " + e.message;
+ });
+}
+
+async function sendMessage(data) {
+ if (!auth.currentUser || !roomId) return;
+
+ $("status").textContent = "পাঠানো হচ্ছে...";
+ try {
+  await addDoc(collection(db,"chats",roomId,"messages"), {
+   ...data,
+   sender: isAdmin ? "admin" : "guest",
+   createdAt:serverTimestamp()
+  });
+  $("status").textContent = "";
+ } catch(e) {
+  $("status").textContent = "পাঠানো যায়নি: " + e.message;
+ }
+}
+
+$("sendForm").onsubmit = async e => {
+ e.preventDefault();
+ const text = $("messageInput").value.trim();
+ if (!text) return;
+ $("sendBtn").disabled = true;
+ await sendMessage({type:"text",text});
+ $("messageInput").value = "";
+ $("sendBtn").disabled = false;
+};
+
+$("imageBtn").onclick = () => $("photo").click();
+
+$("photo").onchange = async e => {
+ const file = e.target.files[0];
+ if (!file) return;
+
+ if (!file.type.startsWith("image/")) {
+  $("status").textContent = "ছবির ফাইল নির্বাচন করুন।";
+  return;
+ }
+
+ $("status").textContent = "ছবি প্রস্তুত হচ্ছে...";
+
+ try {
+  const data = await new Promise((resolve,reject) => {
+   const img = new Image();
+   const url = URL.createObjectURL(file);
+
+   img.onload = () => {
+    let w = img.width, h = img.height;
+    const max = 640;
+    if (w > max || h > max) {
+     const scale = max / Math.max(w,h);
+     w = Math.round(w*scale);
+     h = Math.round(h*scale);
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext("2d").drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(url);
+    resolve(canvas.toDataURL("image/jpeg",0.55));
+   };
+
+   img.onerror = () => {
+    URL.revokeObjectURL(url);
+    reject(new Error("ছবি খোলা যায়নি"));
+   };
+   img.src = url;
+  });
+
+  if (data.length > 450000) {
+   throw new Error("ছবিটি বড়। ছোট ছবি দিন।");
+  }
+
+  await sendMessage({type:"image",mediaData:data,mimeType:"image/jpeg"});
+ } catch(e) {
+  $("status").textContent = e.message;
+ }
+
+ e.target.value = "";
+};
+
+$("voiceBtn").onclick = async () => {
+ if (recorder && recorder.state === "recording") {
+  recorder.stop();
+  $("voiceBtn").textContent = "ভয়েস রেকর্ড";
+  return;
+ }
+
+ if (!navigator.mediaDevices?.getUserMedia ||
+     !window.MediaRecorder) {
+  $("status").textContent = "এই ব্রাউজারে ভয়েস রেকর্ডিং সাপোর্ট নেই।";
+  return;
+ }
+
+ try {
+  const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+  audioChunks = [];
+
+  const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+   ? "audio/webm;codecs=opus"
+   : "";
+
+  recorder = new MediaRecorder(stream,mime ? {mimeType:mime} : {});
+  recorder.ondataavailable = e => {
+   if (e.data.size) audioChunks.push(e.data);
+  };
+
+  recorder.onstop = async () => {
+   stream.getTracks().forEach(t => t.stop());
+
+   const blob = new Blob(audioChunks,{type:recorder.mimeType || "audio/webm"});
+
+   if (blob.size > 250000) {
+    $("status").textContent = "ভয়েস বড় হয়েছে। ১০ সেকেন্ডের মধ্যে রেকর্ড করুন।";
+    return;
+   }
+
+   const reader = new FileReader();
+   reader.onload = async () => {
+    await sendMessage({
+     type:"audio",
+     mediaData:reader.result,
+     mimeType:blob.type
+    });
+   };
+   reader.readAsDataURL(blob);
+  };
+
+  recorder.start();
+  $("voiceBtn").textContent = "রেকর্ড বন্ধ করুন";
+  $("status").textContent = "সর্বোচ্চ ১০ সেকেন্ড রেকর্ড করুন।";
+
+  setTimeout(() => {
+   if (recorder && recorder.state === "recording") {
+    recorder.stop();
+    $("voiceBtn").textContent = "ভয়েস রেকর্ড";
+   }
+  },10000);
+
+ } catch(e) {
+  $("status").textContent = "মাইক্রোফোন অনুমতি দিন: " + e.message;
+ }
+};
 </script>
 </body>
 </html>
