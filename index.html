@@ -3,413 +3,282 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#075e54">
 <title>Private Chat</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#edf2f7;font-family:Arial,sans-serif}
-header{background:#075e54;color:white;padding:16px;font-size:21px;text-align:center}
-main{max-width:650px;margin:auto;padding:12px}
-button{background:#087e6b;color:white;border:0;border-radius:8px;padding:12px;cursor:pointer;font-size:16px}
-input{width:100%;padding:13px;border:1px solid #ccc;border-radius:8px;font-size:16px}
-#messages{height:55vh;overflow:auto;background:white;padding:12px;border-radius:10px;margin:12px 0}
-.msg{background:#dcf8c6;padding:10px;border-radius:10px;margin:8px 0;overflow-wrap:anywhere}
-.adminmsg{background:#dce9ff}
-.msg img{max-width:100%;border-radius:8px}
-.msg audio{width:100%;max-width:280px}
-.small{font-size:12px;color:#555}
-#chat{display:none}
-.row{display:flex;gap:8px;align-items:center}
-.row input{flex:1;min-width:0}
-#photo{display:none}
-a{overflow-wrap:anywhere}
+body{margin:0;background:#edf2f7;font-family:Arial,sans-serif;color:#172b2b}
+header{background:#075e54;color:white;padding:17px 20px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:21px;font-weight:bold}
+main{max-width:850px;margin:25px auto;padding:12px}
+.card{background:white;border-radius:18px;box-shadow:0 5px 25px #0001;overflow:hidden;margin-bottom:18px}
+.hero{background:linear-gradient(135deg,#075e54,#159b85);color:white;padding:27px}
+.hero h1{margin:8px 0;font-size:28px}
+.hero p{line-height:1.6;margin-bottom:0}
+.content{padding:22px}
+h2{font-size:20px;margin-top:0}
+input{width:100%;padding:13px;border:1px solid #d5dfe2;border-radius:10px;font-size:16px;margin:7px 0 14px}
+button{border:0;border-radius:10px;background:#128c7e;color:white;padding:12px 16px;font-size:15px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+.secondary{background:#e8f5f2;color:#075e54}
+.danger{background:#a83232}
+.hidden{display:none!important}
+.muted{color:#718096;font-size:13px;line-height:1.6}
+.error{color:#b42318;font-size:13px;overflow-wrap:anywhere}
+#roomList .room{border:1px solid #e1e8eb;border-radius:13px;padding:14px;margin:12px 0}
+.roomlink{font-size:13px;overflow-wrap:anywhere;color:#087e6b;margin:8px 0}
+.chat{height:calc(100dvh - 115px);min-height:480px;display:flex;flex-direction:column}
+.chathead{background:#075e54;color:white;padding:14px;display:flex;align-items:center;gap:12px}
+.avatar{background:#ffffff25;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:20px}
+.chathead small{display:block;color:#d6efeb;margin-top:4px}
+.chathead .spacer{flex:1}
+#messages{flex:1;overflow-y:auto;padding:15px;background:#e9e5dc;background-image:radial-gradient(#c5c0b6 .6px,transparent .6px);background-size:12px 12px}
+.msg{background:white;border-radius:14px 14px 14px 4px;padding:10px 12px;margin:8px 0;max-width:85%;width:fit-content;overflow-wrap:anywhere;box-shadow:0 2px 4px #0001}
+.msg.mine{margin-left:auto;background:#d5f7c8;border-radius:14px 14px 4px 14px}
+.sender{font-size:11px;font-weight:bold;color:#087e6b;margin-bottom:4px}
+.msg img{display:block;max-width:100%;max-height:300px;border-radius:9px}
+.msg audio{width:250px;max-width:65vw;height:42px}
+.time{font-size:10px;color:#718096;text-align:right;margin-top:5px}
+.empty{margin:30px auto;background:#ffffffdf;padding:16px;border-radius:12px;text-align:center;max-width:270px;font-size:14px;color:#718096}
+.composer{padding:12px;background:#fff;border-top:1px solid #e4e9ee}
+.sendrow{display:flex;gap:8px}
+.sendrow input{flex:1;min-width:0;border-radius:25px;margin:0}
+.sendrow button{border-radius:50%;width:47px;flex-shrink:0;padding:0;font-size:19px}
+.tools{display:flex;gap:8px;margin-top:10px}
+.tools button{background:#e8f5f2;color:#075e54;border-radius:22px}
+#status{font-size:12px;color:#718096;margin:9px 2px 0;overflow-wrap:anywhere}
+@media(max-width:600px){main{margin:12px auto;padding:8px}.hero{padding:22px}.hero h1{font-size:24px}.content{padding:17px}.chat{height:calc(100dvh - 85px);min-height:420px}.msg{max-width:90%}}
 </style>
 </head>
 <body>
-<header>Private Chat</header>
+<header><div class="brand">✉ Private Chat</div><span id="topStatus">ব্যক্তিগত চ্যাট</span></header>
 <main>
-<div id="login" style="display:none">
-<h3>Admin Login</h3>
-<input id="email" type="email" placeholder="Admin email">
-<br><br>
-<input id="password" type="password" placeholder="Password">
-<br><br>
-<button id="loginBtn">Login</button>
-<p id="error"></p>
-</div>
+<section id="home" class="card hidden">
+ <div class="hero"><h1>Private Chat</h1><p>ব্যক্তিগতভাবে মেসেজ, ছবি ও ভয়েস মেসেজ পাঠান।</p></div>
+ <div class="content">
+  <h2>Admin প্যানেল</h2>
+  <p class="muted">নিজের Gmail অ্যাকাউন্ট দিয়ে লগইন করে চ্যাট লিংক তৈরি করুন।</p>
+  <button id="goAdmin">Admin Login</button>
+  <p class="muted">Guest হলে Admin-এর পাঠানো চ্যাট লিংক খুলুন।</p>
+ </div>
+</section>
 
-<div id="dashboard" style="display:none">
-<h3>নতুন চ্যাট লিংক তৈরি করুন</h3>
-<button id="createBtn">নতুন লিংক তৈরি</button>
-<p id="link"></p>
-<hr>
-<h3>চ্যাট খুলুন</h3>
-<input id="roomInput" placeholder="Room ID">
-<br><br>
-<button id="openRoom">চ্যাট খুলুন</button>
-</div>
+<section id="loginPanel" class="card hidden">
+ <div class="hero"><h1>Admin Login</h1><p>আপনার Admin Gmail দিয়ে লগইন করুন।</p></div>
+ <div class="content">
+  <label>Gmail / ইমেইল</label>
+  <input id="email" type="email" placeholder="আপনার Gmail" autocomplete="username">
+  <label>পাসওয়ার্ড</label>
+  <input id="password" type="password" placeholder="পাসওয়ার্ড" autocomplete="current-password">
+  <button id="loginBtn">লগইন করুন</button>
+  <p id="loginError" class="error"></p>
+  <p class="muted">এই Gmail-এর অ্যাকাউন্ট Firebase Authentication-এ আগে তৈরি থাকতে হবে। শুধু Gmail লিখলে অ্যাকাউন্ট তৈরি হয় না।</p>
+  <button id="homeBtn" class="secondary">হোমে ফিরুন</button>
+ </div>
+</section>
 
-<div id="chat">
-<p id="roomLabel"></p>
-<div id="messages"></div>
-<form id="sendForm" class="row">
-<input id="messageInput" placeholder="মেসেজ লিখুন..." maxlength="2000" autocomplete="off">
-<button type="submit" id="sendBtn">Send</button>
-</form>
-<br>
-<div class="row">
-<button id="imageBtn" type="button">ছবি পাঠান</button>
-<button id="voiceBtn" type="button">ভয়েস রেকর্ড</button>
-</div>
-<input id="photo" type="file" accept="image/*">
-<p id="status"></p>
-<button id="backBtn" style="display:none">Admin প্যানেলে ফিরুন</button>
-</div>
+<section id="dashboard" class="card hidden">
+ <div class="hero"><h1>Admin Dashboard</h1><p>নতুন ব্যক্তিগত চ্যাট লিংক তৈরি করুন এবং অতিথির মেসেজ দেখুন।</p></div>
+ <div class="content">
+  <p class="muted">লগইন: <strong id="adminEmail"></strong></p>
+  <button id="createBtn">＋ নতুন চ্যাট লিংক</button>
+  <button id="logoutBtn" class="danger">লগআউট</button>
+  <p id="dashStatus" class="muted"></p>
+  <h2 style="margin-top:25px">আপনার চ্যাট রুম</h2>
+  <div id="roomList"></div>
+  <hr style="border:0;border-top:1px solid #e1e8eb;margin:22px 0">
+  <h2>Room ID দিয়ে চ্যাট খুলুন</h2>
+  <input id="roomInput" placeholder="Room ID">
+  <button id="openRoom">চ্যাট খুলুন</button>
+  <p id="dashError" class="error"></p>
+ </div>
+</section>
+
+<section id="chatPanel" class="card chat hidden">
+ <div class="chathead">
+  <div class="avatar">✉</div>
+  <div><strong id="chatTitle">Private Chat</strong><small id="chatMeta">ব্যক্তিগত চ্যাট</small></div>
+  <div class="spacer"></div>
+  <button id="dashboardBtn" class="secondary">Admin</button>
+ </div>
+ <div id="messages"><div class="empty">চ্যাট শুরু করুন।</div></div>
+ <div class="composer">
+  <form id="sendForm" class="sendrow">
+   <input id="messageInput" maxlength="2000" placeholder="মেসেজ লিখুন..." autocomplete="off">
+   <button id="sendBtn" type="submit">➤</button>
+  </form>
+  <div class="tools">
+   <button id="imageBtn" type="button">▧ ছবি পাঠান</button>
+   <button id="voiceBtn" type="button">● <span id="voiceLabel">ভয়েস মেসেজ</span></button>
+   <input id="photo" class="hidden" type="file" accept="image/*">
+  </div>
+  <div id="status"></div>
+ </div>
+</section>
 </main>
 
 <script type="module">
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import{getAuth,signInAnonymously,signInWithEmailAndPassword,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import{getFirestore,collection,addDoc,doc,setDoc,getDoc,onSnapshot,query,orderBy,serverTimestamp}from"https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-import {
- getAuth, signInAnonymously, signInWithEmailAndPassword,
- onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-import {
- getFirestore, collection, addDoc, doc, setDoc, getDoc,
- onSnapshot, query, orderBy, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-const firebaseConfig = {
- apiKey: "AIzaSyDkYVvqxpGUcmsAJvK6ofIyNgn6-XZTin4",
- authDomain: "private-chat-798f6.firebaseapp.com",
- projectId: "private-chat-798f6",
- storageBucket: "private-chat-798f6.firebasestorage.app",
- messagingSenderId: "598670362336",
- appId: "1:598670362336:web:35e7595356620d48cc7285",
- measurementId: "G-F0S5M7N18D"
+const firebaseConfig={
+ apiKey:"AIzaSyDkYVvqxpGUcmsAJvK6ofIyNgn6-XZTin4",
+ authDomain:"private-chat-798f6.firebaseapp.com",
+ projectId:"private-chat-798f6",
+ storageBucket:"private-chat-798f6.firebasestorage.app",
+ messagingSenderId:"598670362336",
+ appId:"1:598670362336:web:35e7595356620d48cc7285",
+ measurementId:"G-F0S5M7N18D"
 };
+const ADMIN_UID="NBF2IXHvSiZSzIuvLBIhEdDpnNo2";
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+const adminMode=params.get("admin")==="1";
+let roomId=params.get("room"),isAdmin=false,stopMessages=null,stopRooms=null,recorder=null,chunks=[],stream=null,timer=null;
 
-const ADMIN_UID = "NBF2IXHvSiZSzIuvLBIhEdDpnNo2";
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-const params = new URLSearchParams(location.search);
-const adminMode = params.get("admin") === "1";
-let roomId = params.get("room");
-let isAdmin = false;
-let stopMessages = null;
-let recorder = null;
-let audioChunks = [];
-
-const $ = id => document.getElementById(id);
-
-function show(id, yes=true) {
- $(id).style.display = yes ? "block" : "none";
+function show(id,yes=true){$(id).classList.toggle("hidden",!yes)}
+function page(name){
+ ["home","loginPanel","dashboard","chatPanel"].forEach(id=>show(id,id===name));
 }
-
-function safeText(value) {
- return String(value ?? "");
+function roomUrl(id,admin=false){
+ return location.origin+location.pathname+(admin?"?admin=1&room=":"?room=")+encodeURIComponent(id);
 }
+function setStatus(t){$("status").textContent=t||""}
+function newId(){return crypto.randomUUID().replaceAll("-","").slice(0,24)}
 
-function roomUrl(id, admin=false) {
- return location.origin + location.pathname +
-  (admin ? "?admin=1&room=" : "?room=") + encodeURIComponent(id);
+$("goAdmin").onclick=()=>{history.pushState(null,"",location.pathname+"?admin=1");page("loginPanel")};
+$("homeBtn").onclick=()=>{history.pushState(null,"",location.pathname);page("home")};
+
+$("loginBtn").onclick=async()=>{
+ $("loginError").textContent="";
+ const email=$("email").value.trim(),password=$("password").value;
+ if(!email||!password){$("loginError").textContent="Gmail ও পাসওয়ার্ড লিখুন।";return}
+ $("loginBtn").disabled=true;
+ try{await signInWithEmailAndPassword(auth,email,password)}
+ catch(e){$("loginError").textContent="লগইন হয়নি: "+e.message}
+ finally{$("loginBtn").disabled=false}
+};
+$("password").onkeydown=e=>{if(e.key==="Enter")$("loginBtn").click()};
+
+function addRoom(id){
+ const row=document.createElement("div");row.className="room";
+ const heading=document.createElement("strong");heading.textContent="Private Chat";
+ const rid=document.createElement("p");rid.className="muted";rid.textContent="Room ID: "+id;
+ const link=document.createElement("div");link.className="roomlink";link.textContent=roomUrl(id);
+ const copy=document.createElement("button");copy.className="secondary";copy.textContent="লিংক কপি";
+ copy.onclick=async()=>{try{await navigator.clipboard.writeText(roomUrl(id));copy.textContent="কপি হয়েছে"}catch{prompt("লিংক কপি করুন",roomUrl(id))}};
+ const open=document.createElement("button");open.textContent="চ্যাট খুলুন";open.style.marginLeft="7px";open.onclick=()=>location.href=roomUrl(id,true);
+ row.append(heading,rid,link,copy,open);$("roomList").prepend(row);
 }
-
-$("loginBtn").onclick = async () => {
- $("error").textContent = "";
- try {
-  await signInWithEmailAndPassword(
-   auth, $("email").value.trim(), $("password").value
-  );
- } catch(e) {
-  $("error").textContent = "Login হয়নি: " + e.message;
- }
+$("createBtn").onclick=async()=>{
+ $("createBtn").disabled=true;$("dashStatus").textContent="লিংক তৈরি হচ্ছে...";
+ try{
+  const id=newId();
+  await setDoc(doc(db,"chats",id),{active:true,createdAt:serverTimestamp()});
+  addRoom(id);$("roomInput").value=id;$("dashStatus").textContent="চ্যাট লিংক তৈরি হয়েছে।";
+ }catch(e){$("dashStatus").textContent="লিংক তৈরি হয়নি: "+e.message}
+ finally{$("createBtn").disabled=false}
 };
+$("openRoom").onclick=()=>{const id=$("roomInput").value.trim();if(id)location.href=roomUrl(id,true);else $("dashError").textContent="Room ID লিখুন।"};
+$("logoutBtn").onclick=async()=>{await signOut(auth);location.href=location.pathname+"?admin=1"};
+$("dashboardBtn").onclick=()=>{if(isAdmin)location.href=location.pathname+"?admin=1";else location.href=location.pathname};
 
-$("createBtn").onclick = async () => {
- if (!isAdmin) return;
- try {
-  const id = crypto.randomUUID().replaceAll("-", "").slice(0,20);
-  await setDoc(doc(db,"chats",id), {
-   active:true,
-   createdAt:serverTimestamp()
-  });
-  $("link").innerHTML = "";
-  const p = document.createElement("p");
-  p.textContent = "Guest লিংক: ";
-  const a = document.createElement("a");
-  a.href = roomUrl(id);
-  a.textContent = roomUrl(id);
-  a.target = "_blank";
-  p.appendChild(a);
-  $("link").appendChild(p);
-
-  const copy = document.createElement("button");
-  copy.textContent = "লিংক কপি";
-  copy.onclick = async () => {
-   await navigator.clipboard.writeText(roomUrl(id));
-   copy.textContent = "কপি হয়েছে";
-  };
-  $("link").appendChild(copy);
-
-  $("roomInput").value = id;
- } catch(e) {
-  alert("লিংক তৈরি হয়নি: " + e.message);
- }
-};
-
-$("openRoom").onclick = () => {
- const id = $("roomInput").value.trim();
- if (id) location.href = roomUrl(id, true);
-};
-
-$("backBtn").onclick = () => location.href = "?admin=1";
-
-onAuthStateChanged(auth, async user => {
- if (!user) {
-  if (adminMode) show("login");
-  else {
-   try { await signInAnonymously(auth); }
-   catch(e) { $("status").textContent = e.message; }
-  }
+onAuthStateChanged(auth,async user=>{
+ isAdmin=!!user&&user.uid===ADMIN_UID;
+ if(adminMode&&!roomId){
+  if(!user){page("loginPanel");$("topStatus").textContent="Admin Login";return}
+  if(!isAdmin){page("loginPanel");$("loginError").textContent="এই Gmail Admin UID-এর সঙ্গে মেলেনি।";return}
+  page("dashboard");$("topStatus").textContent="Admin Dashboard";$("adminEmail").textContent=user.email||"Admin";
+  if(stopRooms)stopRooms();
+  stopRooms=onSnapshot(query(collection(db,"chats"),orderBy("createdAt","desc")),snap=>{
+   $("roomList").innerHTML="";snap.forEach(d=>addRoom(d.id));
+  },e=>$("dashError").textContent=e.message);
   return;
  }
-
- isAdmin = user.uid === ADMIN_UID;
-
- if (adminMode && !isAdmin) {
-  show("login");
-  $("error").textContent = "এই অ্যাকাউন্ট Admin নয়।";
+ if(!roomId&&!adminMode){page("home");return}
+ if(adminMode&&roomId&&!user){page("loginPanel");return}
+ if(!user){
+  try{await signInAnonymously(auth)}catch(e){page("home");$("topStatus").textContent=e.message}
   return;
  }
-
- if (adminMode && !roomId) {
-  show("login",false);
-  show("dashboard");
-  show("chat",false);
-  return;
- }
-
- if (!adminMode && !roomId) {
-  show("login",false);
-  show("dashboard",false);
-  $("status").textContent = "চ্যাট লিংক সঠিক নয়।";
-  return;
- }
-
- show("login",false);
- show("dashboard",false);
- show("chat");
-
- $("roomLabel").textContent = "Room ID: " + roomId;
- show("backBtn",isAdmin);
-
- try {
-  const roomSnap = await getDoc(doc(db,"chats",roomId));
-  if (!roomSnap.exists() || roomSnap.data().active !== true) {
-   $("status").textContent = "এই চ্যাট লিংক বন্ধ অথবা ভুল।";
-   $("sendBtn").disabled = true;
-   return;
-  }
+ if(adminMode&&roomId&&!isAdmin){page("loginPanel");$("loginError").textContent="Admin হিসেবে লগইন করুন।";return}
+ page("chatPanel");$("topStatus").textContent=isAdmin?"Admin Chat":"Guest Chat";
+ $("chatTitle").textContent=isAdmin?"Admin · Private Chat":"Private Chat";
+ $("chatMeta").textContent=isAdmin?"আপনি Admin হিসেবে যুক্ত":"ব্যক্তিগত চ্যাটে যুক্ত";
+ show("dashboardBtn",isAdmin);
+ try{
+  const snap=await getDoc(doc(db,"chats",roomId));
+  if(!snap.exists()||snap.data().active!==true){setStatus("চ্যাট লিংকটি ভুল অথবা বন্ধ।");return}
   startMessages();
- } catch(e) {
-  $("status").textContent = "চ্যাট খুলতে সমস্যা: " + e.message;
- }
+ }catch(e){setStatus("চ্যাট খুলতে সমস্যা: "+e.message)}
 });
 
-function startMessages() {
- if (stopMessages) stopMessages();
-
- const q = query(
-  collection(db,"chats",roomId,"messages"),
-  orderBy("createdAt","asc")
- );
-
- stopMessages = onSnapshot(q, snapshot => {
-  $("messages").innerHTML = "";
-
-  snapshot.forEach(item => {
-   const m = item.data();
-   const box = document.createElement("div");
-   box.className = "msg " +
-    (m.sender === "admin" ? "adminmsg" : "");
-
-   const who = document.createElement("div");
-   who.className = "small";
-   who.textContent = m.sender === "admin" ? "Admin" : "Guest";
-   box.appendChild(who);
-
-   if (m.type === "image" && m.mediaData) {
-    const img = document.createElement("img");
-    img.src = m.mediaData;
-    img.alt = "ছবি";
-    box.appendChild(img);
-   } else if (m.type === "audio" && m.mediaData) {
-    const audio = document.createElement("audio");
-    audio.controls = true;
-    audio.src = m.mediaData;
-    box.appendChild(audio);
-   } else {
-    const text = document.createElement("div");
-    text.textContent = safeText(m.text);
-    box.appendChild(text);
-   }
-
-   $("messages").appendChild(box);
+function startMessages(){
+ if(stopMessages)stopMessages();
+ stopMessages=onSnapshot(query(collection(db,"chats",roomId,"messages"),orderBy("createdAt","asc")),snap=>{
+  const area=$("messages");area.innerHTML="";
+  if(snap.empty){const empty=document.createElement("div");empty.className="empty";empty.textContent="এখনও কোনো মেসেজ নেই। প্রথম মেসেজটি পাঠান।";area.append(empty);return}
+  snap.forEach(item=>{
+   const m=item.data(),box=document.createElement("div");
+   box.className="msg"+(m.sender===(isAdmin?"admin":"guest")?" mine":"");
+   const who=document.createElement("div");who.className="sender";who.textContent=m.sender==="admin"?"Admin":"Guest";box.append(who);
+   if(m.type==="image"&&m.mediaData){const img=document.createElement("img");img.src=m.mediaData;img.alt="ছবি";box.append(img)}
+   else if(m.type==="audio"&&m.mediaData){const audio=document.createElement("audio");audio.controls=true;audio.src=m.mediaData;box.append(audio)}
+   else{const text=document.createElement("div");text.textContent=String(m.text||"");box.append(text)}
+   const time=document.createElement("div");time.className="time";if(m.createdAt?.toDate)time.textContent=m.createdAt.toDate().toLocaleTimeString("bn-BD",{hour:"2-digit",minute:"2-digit"});box.append(time);
+   area.append(box);
   });
-
-  $("messages").scrollTop = $("messages").scrollHeight;
- }, e => {
-  $("status").textContent = "মেসেজ লোড হয়নি: " + e.message;
- });
+  area.scrollTop=area.scrollHeight;
+ },e=>setStatus("মেসেজ লোড হয়নি: "+e.message));
 }
-
-async function sendMessage(data) {
- if (!auth.currentUser || !roomId) return;
-
- $("status").textContent = "পাঠানো হচ্ছে...";
- try {
-  await addDoc(collection(db,"chats",roomId,"messages"), {
-   ...data,
-   sender: isAdmin ? "admin" : "guest",
-   createdAt:serverTimestamp()
-  });
-  $("status").textContent = "";
- } catch(e) {
-  $("status").textContent = "পাঠানো যায়নি: " + e.message;
- }
+async function sendMessage(data){
+ if(!auth.currentUser||!roomId){setStatus("চ্যাট সংযোগ নেই।");return false}
+ setStatus("পাঠানো হচ্ছে...");
+ try{await addDoc(collection(db,"chats",roomId,"messages"),{...data,sender:isAdmin?"admin":"guest",createdAt:serverTimestamp()});setStatus("");return true}
+ catch(e){setStatus("পাঠানো যায়নি: "+e.message);return false}
 }
-
-$("sendForm").onsubmit = async e => {
- e.preventDefault();
- const text = $("messageInput").value.trim();
- if (!text) return;
- $("sendBtn").disabled = true;
- await sendMessage({type:"text",text});
- $("messageInput").value = "";
- $("sendBtn").disabled = false;
+$("sendForm").onsubmit=async e=>{
+ e.preventDefault();const input=$("messageInput"),text=input.value.trim();if(!text)return;
+ $("sendBtn").disabled=true;const ok=await sendMessage({type:"text",text});if(ok)input.value="";$("sendBtn").disabled=false;
 };
-
-$("imageBtn").onclick = () => $("photo").click();
-
-$("photo").onchange = async e => {
- const file = e.target.files[0];
- if (!file) return;
-
- if (!file.type.startsWith("image/")) {
-  $("status").textContent = "ছবির ফাইল নির্বাচন করুন।";
-  return;
- }
-
- $("status").textContent = "ছবি প্রস্তুত হচ্ছে...";
-
- try {
-  const data = await new Promise((resolve,reject) => {
-   const img = new Image();
-   const url = URL.createObjectURL(file);
-
-   img.onload = () => {
-    let w = img.width, h = img.height;
-    const max = 640;
-    if (w > max || h > max) {
-     const scale = max / Math.max(w,h);
-     w = Math.round(w*scale);
-     h = Math.round(h*scale);
-    }
-
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    canvas.getContext("2d").drawImage(img,0,0,w,h);
-    URL.revokeObjectURL(url);
-    resolve(canvas.toDataURL("image/jpeg",0.55));
-   };
-
-   img.onerror = () => {
-    URL.revokeObjectURL(url);
-    reject(new Error("ছবি খোলা যায়নি"));
-   };
-   img.src = url;
+$("imageBtn").onclick=()=>$("photo").click();
+$("photo").onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;
+ if(!file.type.startsWith("image/")){setStatus("ছবির ফাইল নির্বাচন করুন।");return}
+ setStatus("ছবি প্রস্তুত হচ্ছে...");
+ try{
+  const data=await new Promise((resolve,reject)=>{
+   const img=new Image(),url=URL.createObjectURL(file);
+   img.onload=()=>{let w=img.width,h=img.height,max=640;if(w>max||h>max){const s=max/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
+    const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);URL.revokeObjectURL(url);resolve(c.toDataURL("image/jpeg",.55))};
+   img.onerror=()=>{URL.revokeObjectURL(url);reject(Error("ছবি খোলা যায়নি"))};img.src=url;
   });
-
-  if (data.length > 450000) {
-   throw new Error("ছবিটি বড়। ছোট ছবি দিন।");
-  }
-
+  if(data.length>450000)throw Error("ছবিটি বড়। ছোট ছবি দিন।");
   await sendMessage({type:"image",mediaData:data,mimeType:"image/jpeg"});
- } catch(e) {
-  $("status").textContent = e.message;
- }
-
- e.target.value = "";
+ }catch(e){setStatus(e.message)}finally{e.target.value=""}
 };
-
-$("voiceBtn").onclick = async () => {
- if (recorder && recorder.state === "recording") {
-  recorder.stop();
-  $("voiceBtn").textContent = "ভয়েস রেকর্ড";
-  return;
- }
-
- if (!navigator.mediaDevices?.getUserMedia ||
-     !window.MediaRecorder) {
-  $("status").textContent = "এই ব্রাউজারে ভয়েস রেকর্ডিং সাপোর্ট নেই।";
-  return;
- }
-
- try {
-  const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-  audioChunks = [];
-
-  const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-   ? "audio/webm;codecs=opus"
-   : "";
-
-  recorder = new MediaRecorder(stream,mime ? {mimeType:mime} : {});
-  recorder.ondataavailable = e => {
-   if (e.data.size) audioChunks.push(e.data);
+$("voiceBtn").onclick=async()=>{
+ if(recorder&&recorder.state==="recording"){recorder.stop();return}
+ if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){setStatus("Chrome ব্রাউজারে মাইক্রোফোন ব্যবহার করুন।");return}
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];
+  const mime=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;codecs=opus":"";
+  recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});
+  recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  recorder.onstart=()=>{$("voiceLabel").textContent="রেকর্ড বন্ধ করুন";$("voiceBtn").style.background="#ffdede";setStatus("রেকর্ড হচ্ছে—১০ সেকেন্ডের মধ্যে বন্ধ হবে।")};
+  recorder.onstop=()=>{
+   clearTimeout(timer);stream?.getTracks().forEach(t=>t.stop());
+   $("voiceLabel").textContent="ভয়েস মেসেজ";$("voiceBtn").style.background="";
+   const blob=new Blob(chunks,{type:recorder.mimeType||"audio/webm"});
+   if(blob.size>250000){setStatus("ভয়েস বড় হয়েছে। ১০ সেকেন্ডের মধ্যে রেকর্ড করুন।");return}
+   const reader=new FileReader();reader.onload=()=>sendMessage({type:"audio",mediaData:reader.result,mimeType:blob.type});reader.readAsDataURL(blob);
   };
-
-  recorder.onstop = async () => {
-   stream.getTracks().forEach(t => t.stop());
-
-   const blob = new Blob(audioChunks,{type:recorder.mimeType || "audio/webm"});
-
-   if (blob.size > 250000) {
-    $("status").textContent = "ভয়েস বড় হয়েছে। ১০ সেকেন্ডের মধ্যে রেকর্ড করুন।";
-    return;
-   }
-
-   const reader = new FileReader();
-   reader.onload = async () => {
-    await sendMessage({
-     type:"audio",
-     mediaData:reader.result,
-     mimeType:blob.type
-    });
-   };
-   reader.readAsDataURL(blob);
-  };
-
-  recorder.start();
-  $("voiceBtn").textContent = "রেকর্ড বন্ধ করুন";
-  $("status").textContent = "সর্বোচ্চ ১০ সেকেন্ড রেকর্ড করুন।";
-
-  setTimeout(() => {
-   if (recorder && recorder.state === "recording") {
-    recorder.stop();
-    $("voiceBtn").textContent = "ভয়েস রেকর্ড";
-   }
-  },10000);
-
- } catch(e) {
-  $("status").textContent = "মাইক্রোফোন অনুমতি দিন: " + e.message;
- }
+  recorder.start();timer=setTimeout(()=>{if(recorder?.state==="recording")recorder.stop()},10000);
+ }catch(e){setStatus("মাইক্রোফোনের অনুমতি দিন: "+e.message)}
 };
+if(adminMode&&!roomId)page("loginPanel");else if(!roomId)page("home");
 </script>
 </body>
 </html>
